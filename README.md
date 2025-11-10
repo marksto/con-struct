@@ -4,10 +4,11 @@
 
 Clojure wrapper for Structured Concurrency (JDK 25+).
 
-## Usage
+> ⚠️ **DISCLAIMER!**</br>
+> JDK 25+ is mandatory in order to use this Clojure wrapper lib!</br>
+> Please note this feature is still a _preview feature_ in JDK 25.
 
-⚠️ JDK 25+ is mandatory in order to use this Clojure wrapper lib!
-⚠️ Please note this feature is still a preview feature in JDK 25.
+## Usage
 
 Add `com.github.marksto/con-struct` to your project dependencies.
 
@@ -234,7 +235,7 @@ Add `com.github.marksto/con-struct` to your project dependencies.
 ;    #error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}]
 ```
 
-#### Using `:all-until` with a Predicate
+#### Custom Predicate for `:all-until`
 
 ```clojure
 (require '[marksto.con-struct.core :refer :all])
