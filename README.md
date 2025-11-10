@@ -5,10 +5,12 @@
 Clojure wrapper for Structured Concurrency (JDK 25+).
 
 > ⚠️ **DISCLAIMER!**</br>
-> JDK 25+ is mandatory in order to use this Clojure wrapper lib!</br>
-> Please note this feature is still a _preview feature_ in JDK 25.
+> Please note this feature is still a _preview feature_ in JDK 25.</br>
+> The `StructuredTaskScope` API has already been heavily reworked.
 
 ## Usage
+
+**JDK 25+ is required to use this Clojure wrapper library.**
 
 Add `com.github.marksto/con-struct` to your project dependencies.
 
