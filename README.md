@@ -8,11 +8,38 @@ Clojure wrapper for Structured Concurrency (JDK 25+).
 > Please note this feature is still a _preview feature_ in JDK 25.</br>
 > The `StructuredTaskScope` API has already been heavily reworked.
 
+## Table of Contents
+
+1. [Goals](#goals)
+2. [Usage](#usage)
+    - [Basic Usage](#built-in-joiners)
+    - [Built-in Joiners](#built-in-joiners)
+        - [`:all-successful`](#all-successful)
+        - [`:any-successful`](#any-successful)
+        - [`:await-all-successful`](#await-all-successful)
+        - [`:await-all`](#await-all)
+        - [`:all-until`](#all-until)
+            - [Custom Predicate for `:all-until`](#custom-predicate-for-all-until)
+    - [Joiners Aliases](#joiners-aliases)
+3. [Documentation](#documentation)
+4. [License](#license)
+
+## Goals
+
+1. Keep it **thin**. Do not introduce any new concepts, just wrap what's already there.
+2. Be **idiomatic**. Whenever there are sharp Java corners in the API, cut them nicely.
+3. Have **defaults** convenient and reasonable. Stay close to the Java API's defaults.
+4. Keep it **flexible**. End user should be able to easily reuse or extend the behavior.
+
 ## Usage
 
 **JDK 25+ is required to use this Clojure wrapper library.**
 
 Add `com.github.marksto/con-struct` to your project dependencies.
+
+### Basic Usage
+
+Here's how it will most likely look in your code. Nothing too fancy, huh?
 
 ```clojure
 (require '[marksto.con-struct.core :refer :all])
@@ -25,7 +52,20 @@ Add `com.github.marksto/con-struct` to your project dependencies.
        (range 10)))
 ```
 
+And, since `with-scope` is a mere function, it can be used in threading:
+
+```clojure
+(->> (range 10)
+     (map (fn [item-id]
+            ;; NB: Return Callable, don't call just yet.
+            #(do-some-remote-call! http-client item-id)))
+     (with-scope {:joiner :all-successful})
+     (apply merge))
+```
+
 ### Built-in Joiners
+
+To assess the joiners that come built-in with the JDK we'll use the following aux functions:
 
 ```clojure
 (require '[marksto.con-struct.core :refer :all])
@@ -35,22 +75,24 @@ Add `com.github.marksto/con-struct` to your project dependencies.
   (println idx)
   idx)
 
-(def all-successful
-  (map (fn [idx] #(a-success idx)) (range 5)))
-
 (defn a-failure [idx]
   (Thread/sleep (rand-int 100))
   (println (format "%d!" idx))
   (throw (ex-info "Oh no!" {:idx idx})))
+
+(def all-successful
+    (map (fn [idx] #(a-success idx)) (range 5)))
 
 (def any-failed
   (map (fn [idx] #(if (= 3 idx) (a-failure idx) (a-success idx))) (range 5)))
 
 (def all-failed
   (map (fn [idx] #(a-failure idx)) (range 5)))
+```
 
-;; `:all-successful`
+#### `:all-successful`
 
+```clojure
 (with-scope
   {:joiner :all-successful}
   all-successful)
@@ -76,9 +118,11 @@ Add `com.github.marksto/con-struct` to your project dependencies.
 ;1!
 ;=> ExceptionInfo: Structured task scope join failed {:joiner :all-successful}
 ;   ExceptionInfo: Oh no! {:idx 1}
+```
 
-;; `:any-successful`
+#### `:any-successful`
 
+```clojure
 (with-scope
   {:joiner :any-successful}
   all-successful)
@@ -102,9 +146,11 @@ Add `com.github.marksto/con-struct` to your project dependencies.
 ;4!
 ;=> ExceptionInfo: Structured task scope join failed {:joiner :all-successful}
 ;   ExceptionInfo: Oh no! {:idx 2}
+```
 
-;; `:await-all-successful`
+#### `:await-all-successful`
 
+```clojure
 (with-scope
   {:joiner :await-all-successful}
   all-successful)
@@ -129,9 +175,11 @@ Add `com.github.marksto/con-struct` to your project dependencies.
 ;2!
 ;=> ExceptionInfo: Structured task scope join failed {:joiner :all-successful}
 ;   ExceptionInfo: Oh no! {:idx 2}
+```
 
-;; `:await-all`
+#### `:await-all`
 
+```clojure
 (with-scope
   {:joiner :await-all}
   all-successful)
@@ -161,9 +209,11 @@ Add `com.github.marksto/con-struct` to your project dependencies.
 ;0!
 ;2!
 ;=> nil
+```
 
-;; `:all-until`
+#### `:all-until`
 
+```clojure
 (with-scope
   {:joiner :all-until}
   all-successful)
@@ -201,43 +251,9 @@ Add `com.github.marksto/con-struct` to your project dependencies.
 ;    #error{:cause "Oh no!" :data {:idx 2} ...}
 ;    #error{:cause "Oh no!" :data {:idx 3} ...}
 ;    #error{:cause "Oh no!" :data {:idx 4} ...}]
-
-(with-scope
-  {:joiner      :all-until
-   :joiner-args [(constantly true)]}
-  all-successful)
-;1
-;=> [#error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}
-;    1
-;    #error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}
-;    #error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}
-;    #error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}]
-
-(with-scope
-  {:joiner      :all-until
-   :joiner-args [(constantly true)]}
-  any-failed)
-;1
-;3!
-;=> [#error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}
-;    1
-;    #error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}
-;    #error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}
-;    #error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}]
-
-(with-scope
-  {:joiner      :all-until
-   :joiner-args [(constantly true)]}
-  all-failed)
-;1!
-;=> [#error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}
-;    #error{:cause "Oh no!" :data {:idx 1} ...}
-;    #error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}
-;    #error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}
-;    #error{:cause "The subtask result or exception is not available" :data {:type :subtask.state/unavailable} ...}]
 ```
 
-#### Custom Predicate for `:all-until`
+##### Custom Predicate for `:all-until`
 
 ```clojure
 (require '[marksto.con-struct.core :refer :all])
@@ -288,10 +304,22 @@ Add `com.github.marksto/con-struct` to your project dependencies.
 ;    #error{:cause "Oh no!" :data {:idx 4} ...}]
 ```
 
+### Joiner Aliases
+
+All built-in joiners come with a default key (usually shortest) and a few aliases (for your taste and convenience).
+
+For example, here's a full list of keys one can use with the `:any-successful` joiner:
+
+- `:any-successful-result-or-throw`
+- `:any-successful-result`
+- `:any-successful`
+
 ## Documentation
 
 Please see the docstring of the `with-scope` function.
 
 ## License
+
+Copyright © 2025 Mark Sto
 
 Licensed under [EPL 1.0](LICENSE) (same as Clojure).
