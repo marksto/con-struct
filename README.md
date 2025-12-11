@@ -5,8 +5,8 @@
 Clojure wrapper for Structured Concurrency (JDK 25+).
 
 > ⚠️ **DISCLAIMER!**</br>
-> Please note this feature is still a _preview feature_ in JDK 25.</br>
-> The `StructuredTaskScope` API has already been heavily reworked.
+> Please note that `StructuredTaskScope` feature is still a _preview feature_ in JDK 25.</br>
+> Its API has already been heavily reworked and will be updated in upcoming releases.
 
 ## Table of Contents
 
@@ -36,6 +36,8 @@ Clojure wrapper for Structured Concurrency (JDK 25+).
 **JDK 25+ is required to use this Clojure wrapper library.**
 
 Add `com.github.marksto/con-struct` to your project dependencies.
+
+Also, add `"--enable-preview"` to the JVM opts to enable this feature.
 
 ### Basic Usage
 
@@ -317,6 +319,13 @@ For example, here's a full list of keys one can use with the `:any-successful` j
 ## Documentation
 
 Please see the docstring of the `with-scope` function.
+
+## Future Work
+
+- [ ] Adopt the JDK 26 API changes
+- [ ] Integrate with `ScopedValue`
+- [ ] Write missing fn docstrings
+- [ ] Cover with unit tests
 
 ## License
 
