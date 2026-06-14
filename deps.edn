@@ -1,6 +1,6 @@
 {:paths ["src"]
 
- :deps  {org.clojure/clojure {:mvn/version "1.12.4"}}
+ :deps  {org.clojure/clojure {:mvn/version "1.12.5"}}
 
  :aliases
  {:dev
@@ -12,6 +12,6 @@
                                                        :git/sha "dfb30dd"}}}
 
   :build
-  {:deps       {io.github.clojure/tools.build {:mvn/version "0.10.12"}
-                slipset/deps-deploy           {:mvn/version "0.2.2"}}
+  {:deps       {io.github.clojure/tools.build {:mvn/version "0.10.14"}
+                slipset/deps-deploy           {:mvn/version "0.2.5"}}
    :ns-default build}}}
