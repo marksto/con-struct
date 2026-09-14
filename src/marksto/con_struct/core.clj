@@ -139,11 +139,6 @@
 (defn scope:cancelled? [scope]
   (StructuredTaskScope/.isCancelled scope))
 
-(defn- ensure-tasks [tasks]
-  (when (empty? tasks)
-    (throw
-      (IllegalArgumentException. "At least one task must be forked before join"))))
-
 (defn with-scope
   "Performs `tasks` within a structured task scope opened with the given `opts`.
 
@@ -168,7 +163,9 @@
 
    Returns the result depending on the used joiner behaviour. Generally, it's
    either a vector of task results (in order of the tasks) or a single (first
-   successful) task result.
+   successful) task result. If `tasks` are empty, returns whatever the joiner
+   yields for an empty scope — an empty vec / `nil` for all built-ins, except
+   for the `:any-successful` one, which throws.
 
    NB: Since the JDK 26, a joiner may choose to return a result on timeout
        instead of throwing. The built-in `:all-until` does exactly that —
@@ -177,9 +174,8 @@
        complete. On the JDK 25 a timeout always throws for any joiner."
   {:style/indent 1}
   ([tasks]
-   (with-scope tasks nil))
+   (with-scope nil tasks))
   ([opts tasks]
-   (ensure-tasks tasks)
    (with-open [scope (scope:open opts)]
      (run! #(when-not (scope:cancelled? scope) (scope:fork scope %)) tasks)
      (try
