@@ -329,6 +329,6 @@ Please see the docstring of the `with-scope` function.
 
 ## License
 
-Copyright © 2025 Mark Sto
+Copyright © 2026 Mark Sto
 
 Licensed under [EPL 1.0](LICENSE) (same as Clojure).
