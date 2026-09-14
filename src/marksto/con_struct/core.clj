@@ -19,16 +19,17 @@
                                  StructuredTaskScope$Subtask$State)
            (java.util.stream BaseStream)))
 
-;; TODO: Docstrings.
 ;; TODO: `ScopedValue`s.
 
 ;;; Joiners
 
 (def joiner-aliases
+  "A hierarchy that derives every joiner alias key from its default one."
   (-> (make-hierarchy)
       (derive :all-successful-or-throw :all-successful)
 
       (derive :any-successful-result-or-throw :any-successful)
+      (derive :any-successful-or-throw :any-successful)
       (derive :any-successful-result :any-successful)
 
       (derive :await-all-successful-or-throw :await-all-successful)
@@ -70,20 +71,30 @@
 ;;; Subtasks
 
 (def state-enum->kwd
+  "A map of every `StructuredTaskScope$Subtask$State` to its keyword."
   {StructuredTaskScope$Subtask$State/SUCCESS     :subtask.state/success
    StructuredTaskScope$Subtask$State/FAILED      :subtask.state/failed
    StructuredTaskScope$Subtask$State/UNAVAILABLE :subtask.state/unavailable})
 
-(defn subtask->state [subtask]
+(defn subtask->state
+  "Returns the state of the `subtask` as a keyword of [[state-enum->kwd]]."
+  [subtask]
   (state-enum->kwd (StructuredTaskScope$Subtask/.state subtask)))
 
-(defn subtask->result [subtask]
+(defn subtask->result
+  "Returns the result of the `subtask`, provided it has succeeded."
+  [subtask]
   (StructuredTaskScope$Subtask/.get subtask))
 
-(defn subtask->ex ^Throwable [subtask]
+(defn subtask->ex
+  "Returns the exception of the `subtask`, provided it has failed."
+  ^Throwable [subtask]
   (StructuredTaskScope$Subtask/.exception subtask))
 
-(defn subtask->result-or-ex [subtask]
+(defn subtask->result-or-ex
+  "Returns the result of the `subtask`, or the exception it failed with.
+   Never throws."
+  [subtask]
   (if (instance? StructuredTaskScope$Subtask subtask)
     (case (subtask->state subtask)
       :subtask.state/success
@@ -129,13 +140,19 @@
        (StructuredTaskScope/open joiner)
        (StructuredTaskScope/open joiner #(config-fn opts %))))))
 
-(defn scope:fork [scope ^Callable task]
+(defn scope:fork
+  "Forks the `task` in the `scope`, returns the subtask that represents it."
+  [scope ^Callable task]
   (StructuredTaskScope/.fork scope task))
 
-(defn scope:join [scope]
+(defn scope:join
+  "Waits for the `scope` subtasks to complete, returns the joiner's result."
+  [scope]
   (StructuredTaskScope/.join scope))
 
-(defn scope:cancelled? [scope]
+(defn scope:cancelled?
+  "Returns `true` if the `scope` has been cancelled."
+  [scope]
   (StructuredTaskScope/.isCancelled scope))
 
 (defn with-scope
