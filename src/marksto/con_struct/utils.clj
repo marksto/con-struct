@@ -19,10 +19,6 @@
    exception."
   [^Throwable ex msg data]
   (let [cause (ex-cause ex)
-        _ (prn ex)
-        _ (prn msg)
-        _ (prn data)
-        _ (prn cause)
         wrapped (ex-info msg data cause)]
     (Throwable/.addSuppressed wrapped ex)
     (doseq [sex (Throwable/.getSuppressed cause)]
