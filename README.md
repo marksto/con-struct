@@ -12,7 +12,7 @@ Clojure wrapper for Structured Concurrency (JDK 25+).
 
 1. [Goals](#goals)
 2. [Usage](#usage)
-    - [Basic Usage](#built-in-joiners)
+    - [Basic Usage](#basic-usage)
     - [Built-in Joiners](#built-in-joiners)
         - [`:all-successful`](#all-successful)
         - [`:any-successful`](#any-successful)
@@ -20,7 +20,7 @@ Clojure wrapper for Structured Concurrency (JDK 25+).
         - [`:await-all`](#await-all)
         - [`:all-until`](#all-until)
             - [Custom Predicate for `:all-until`](#custom-predicate-for-all-until)
-    - [Joiners Aliases](#joiners-aliases)
+    - [Joiner Aliases](#joiner-aliases)
 3. [Documentation](#documentation)
 4. [License](#license)
 
@@ -146,7 +146,7 @@ To assess the joiners that come built-in with the JDK we'll use the following au
 ;1!
 ;3!
 ;4!
-;=> ExceptionInfo: Structured task scope join failed {:joiner :all-successful}
+;=> ExceptionInfo: Structured task scope join failed {:joiner :any-successful}
 ;   ExceptionInfo: Oh no! {:idx 2}
 ```
 
@@ -168,14 +168,14 @@ To assess the joiners that come built-in with the JDK we'll use the following au
   any-failed)
 ;2
 ;3!
-;=> ExceptionInfo: Structured task scope join failed {:joiner :all-successful}
+;=> ExceptionInfo: Structured task scope join failed {:joiner :await-all-successful}
 ;   ExceptionInfo: Oh no! {:idx 3}
 
 (with-scope
   {:joiner :await-all-successful}
   all-failed)
 ;2!
-;=> ExceptionInfo: Structured task scope join failed {:joiner :all-successful}
+;=> ExceptionInfo: Structured task scope join failed {:joiner :await-all-successful}
 ;   ExceptionInfo: Oh no! {:idx 2}
 ```
 
@@ -325,7 +325,7 @@ Please see the docstring of the `with-scope` function.
 - [x] Adopt the JDK 26 API changes
 - [ ] Integrate with `ScopedValue`
 - [ ] Write missing fn docstrings
-- [ ] Cover with unit tests
+- [x] Cover with unit tests
 
 ## License
 

@@ -20,7 +20,6 @@
            (java.util.stream BaseStream)))
 
 ;; TODO: Docstrings.
-;; TODO: Unit tests.
 ;; TODO: `ScopedValue`s.
 
 ;;; Joiners
