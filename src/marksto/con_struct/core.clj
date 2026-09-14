@@ -85,19 +85,23 @@
   (StructuredTaskScope$Subtask/.exception subtask))
 
 (defn subtask->result-or-ex [subtask]
-  (case (subtask->state subtask)
-    :subtask.state/success
-    (subtask->result subtask)
+  (if (instance? StructuredTaskScope$Subtask subtask)
+    (case (subtask->state subtask)
+      :subtask.state/success
+      (subtask->result subtask)
 
-    :subtask.state/failed
-    (subtask->ex subtask)
+      :subtask.state/failed
+      (subtask->ex subtask)
 
-    :subtask.state/unavailable
-    ;; NB: Avoid throwing here, just return a Clojure exception.
-    ;;     Useful when a scope was cancelled before all subtasks
-    ;;     were forked or completed other than due to a timeout.
-    (ex-info "The subtask result or exception is not available"
-             {:type :subtask.state/unavailable})))
+      :subtask.state/unavailable
+      ;; NB: Avoid throwing here, just return a Clojure exception.
+      ;;     Useful when a scope was cancelled before all subtasks
+      ;;     were forked or completed other than due to a timeout.
+      (ex-info "The subtask result or exception is not available"
+               {:type :subtask.state/unavailable}))
+    ;; NB: Since the JDK 26, some joiners, e.g. `allSuccessfulOrThrow`, yield
+    ;;     plain results instead of subtasks. Pass those through as they are.
+    subtask))
 
 ;;; Scopes
 
