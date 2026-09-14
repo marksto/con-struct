@@ -322,7 +322,7 @@ Please see the docstring of the `with-scope` function.
 
 ## Future Work
 
-- [ ] Adopt the JDK 26 API changes
+- [x] Adopt the JDK 26 API changes
 - [ ] Integrate with `ScopedValue`
 - [ ] Write missing fn docstrings
 - [ ] Cover with unit tests

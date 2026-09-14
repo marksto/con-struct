@@ -168,7 +168,13 @@
 
    Returns the result depending on the used joiner behaviour. Generally, it's
    either a vector of task results (in order of the tasks) or a single (first
-   successful) task result."
+   successful) task result.
+
+   NB: Since the JDK 26, a joiner may choose to return a result on timeout
+       instead of throwing. The built-in `:all-until` does exactly that —
+       it yields the results collected so far, standing in an `ex-info` of
+       the `:subtask.state/unavailable` type for every subtask that didn't
+       complete. On the JDK 25 a timeout always throws for any joiner."
   {:style/indent 1}
   ([tasks]
    (with-scope tasks nil))
