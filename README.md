@@ -5,7 +5,7 @@
 Clojure wrapper for Structured Concurrency (JDK 25+).
 
 > ⚠️ **DISCLAIMER!**</br>
-> Please note that `StructuredTaskScope` feature is still a _preview feature_ in JDK 25.</br>
+> Please note that `StructuredTaskScope` is still a _preview feature_ in JDK 25 — 26.</br>
 > Its API has already been heavily reworked and will be updated in upcoming releases.
 
 ## Table of Contents
