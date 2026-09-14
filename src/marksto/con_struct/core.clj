@@ -52,7 +52,9 @@
   (StructuredTaskScope$Joiner/allSuccessfulOrThrow))
 
 (defmethod new-joiner :any-successful [_ & _]
-  (StructuredTaskScope$Joiner/anySuccessfulResultOrThrow))
+  (utils/compile-if-jdk 26
+    (StructuredTaskScope$Joiner/anySuccessfulOrThrow)
+    (StructuredTaskScope$Joiner/anySuccessfulResultOrThrow)))
 
 (defmethod new-joiner :await-all-successful [_ & _]
   (StructuredTaskScope$Joiner/awaitAllSuccessfulOrThrow))
@@ -163,6 +165,7 @@
    Returns the result depending on the used joiner behaviour. Generally, it's
    either a vector of task results (in order of the tasks) or a single (first
    successful) task result."
+  {:style/indent 1}
   ([tasks]
    (with-scope tasks nil))
   ([opts tasks]
@@ -193,11 +196,13 @@
 (defn with-shutdown-on-failure
   "Performs the given `tasks` within a structured task scope, waits for all of
    them to succeed and returns `nil`, or throws if any of them fails."
+  {:style/indent 1}
   [tasks]
   (with-scope {:joiner :await-all-successful} tasks))
 
 (defn with-shutdown-on-success
   "Performs the given `tasks` within a structured task scope, returns the first
    successful result, or throws if all of them fail."
+  {:style/indent 1}
   [tasks]
   (with-scope {:joiner :any-successful} tasks))

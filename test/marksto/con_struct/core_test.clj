@@ -1,6 +1,11 @@
 (ns marksto.con-struct.core-test
-  (:require [clojure.test :as test :refer [deftest is]]
-            [marksto.con-struct.core :as sut]))
+  (:require [clojure.test :refer [deftest is testing]]
+            [marksto.con-struct.core :as sut])
+  (:import (java.util.concurrent StructuredTaskScope$Joiner)))
 
-(deftest dummy-test
-  (is (= 1 1)))
+;; NB: Guards the JDK-conditional `anySuccessful[Result]OrThrow` call.
+(deftest any-successful-joiner-test
+  (is (instance? StructuredTaskScope$Joiner (sut/new-joiner :any-successful)))
+  (is (= :fast (sut/with-scope {:joiner :any-successful}
+                 [(fn [] (Thread/sleep 50) :slow)
+                  (fn [] :fast)]))))

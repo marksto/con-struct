@@ -7,7 +7,8 @@
 ;; You must not remove this notice, or any other, from this software.
 
 (ns marksto.con-struct.utils
-  {:author "Mark Sto (@marksto)"})
+  {:author "Mark Sto (@marksto)"}
+  (:import (java.lang Runtime$Version)))
 
 (defn wrap-and-throw-cause
   "For a `Throwable` instance `ex`, takes its cause and wraps it into
@@ -24,3 +25,18 @@
     (doseq [sex (Throwable/.getSuppressed cause)]
       (Throwable/.addSuppressed wrapped sex))
     (throw wrapped)))
+
+(def jdk-feature-version
+  "The feature (major) version number of the JDK that compiles this code."
+  (Runtime$Version/.feature (Runtime/version)))
+
+(defmacro compile-if-jdk
+  "Expands into the `then` form when the JDK that compiles this code is of
+   the `min-version` feature (major) version or newer, and into the `else`
+   form otherwise.
+
+   Since only the selected branch is ever handed over to the compiler, the
+   other one may freely reference classes, methods and fields that are not
+   present on this JDK."
+  [min-version then else]
+  (if (<= min-version jdk-feature-version) then else))
